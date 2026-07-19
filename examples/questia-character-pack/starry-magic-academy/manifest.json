@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "packId": "questia.sample.starry-magic-academy",
+  "name": "クエスティア・星空の魔法学院パック",
+  "version": "1.0.0",
+  "description": "パック機能の動作確認に使える、3人の星空の魔法使いたちです。",
+  "author": "Questia Sample",
+  "license": "Sample assets for Questia development",
+  "createdAt": "2026-07-20",
+  "minimumQuestiaVersion": "1.0.0",
+  "characters": [
+    {
+      "id": "lumina",
+      "name": "星詠みのルミナ",
+      "rarity": "SSR",
+      "weight": 1,
+      "attribute": "water",
+      "series": "星空の魔法学院",
+      "image": "characters/lumina.webp",
+      "description": "星の光を読み解く学院の首席魔法使い。",
+      "quote": "一緒に、星の答えを探しましょう。",
+      "tags": ["魔法使い", "星空", "水属性"]
+    },
+    {
+      "id": "sol",
+      "name": "陽光のソル",
+      "rarity": "SR",
+      "weight": 1,
+      "attribute": "fire",
+      "series": "星空の魔法学院",
+      "image": "characters/sol.webp",
+      "description": "小さな太陽を灯して仲間を励ます魔法使い。",
+      "quote": "あと少し、いけるよ！",
+      "tags": ["魔法使い", "太陽", "火属性"]
+    },
+    {
+      "id": "nox",
+      "name": "夜風のノクス",
+      "rarity": "R",
+      "weight": 1,
+      "attribute": "wind",
+      "series": "星空の魔法学院",
+      "image": "characters/nox.webp",
+      "description": "静かな夜風とともに勉強を見守る魔法使い。",
+      "quote": "焦らなくていい。自分の速さで進もう。",
+      "tags": ["魔法使い", "夜", "風属性"]
+    }
+  ]
+}

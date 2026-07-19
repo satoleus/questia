@@ -1,0 +1,17 @@
+{
+  "name": "クエスティア（Questia）",
+  "short_name": "Questia",
+  "description": "集中時間がオーブになる作業相棒つきポモドーロ",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#14203a",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

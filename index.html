@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#14203a" />
+  <meta name="description" content="集中時間がオーブになる、作業相棒つきポモドーロアプリ" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon.svg" />
+  <link rel="stylesheet" href="styles.css?v=35" />
+  <title>クエスティア | Questia</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="top-leading">
+        <button id="menu-toggle" class="menu-toggle icon-button" type="button" aria-label="メニューを開く" aria-controls="app-menu" aria-expanded="false"><span></span><span></span><span></span></button>
+        <button class="brand" data-page="focus" aria-label="ホームへ">
+          <span class="brand-mark">✦</span>
+          <span>Questia</span>
+        </button>
+      </div>
+      <div class="top-actions">
+        <div class="orb-pill" title="所持オーブ"><span>◈</span><strong id="orb-count">0</strong></div>
+        <button id="theme-toggle" class="icon-button" aria-label="テーマ切替">☾</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="focus-page" class="page active">
+        <div class="focus-layout">
+          <article class="companion-card">
+            <img id="companion-image" src="assets/companion-streamer-01.webp" alt="作業を一緒にする配信中の女の子" />
+            <div class="companion-shade"></div>
+            <div class="companion-clock" aria-label="現在の日付と時刻">
+              <small id="current-date">2026年7月20日（月）</small>
+              <strong id="current-time">00:00</strong>
+            </div>
+            <button id="focus-timer-badge" class="focus-timer-badge show" type="button" aria-label="タイマーメニューを開く">
+              <span id="focus-timer-label">FOCUS</span>
+              <strong id="focus-timer-display">25:00</strong>
+              <small id="focus-timer-status">タイマーを開く</small>
+            </button>
+            <div class="status-bubble">
+              <span class="status-dot"></span>
+              <span id="companion-message">今日も一緒に、少しずつ進めよう</span>
+            </div>
+            <button id="change-companion" class="glass-button">画像を変更</button>
+          </article>
+        </div>
+
+        <div class="summary-grid">
+          <article class="mini-card"><span>今日の集中</span><strong id="today-focus">0分</strong></article>
+          <article class="mini-card"><span>完了セッション</span><strong id="session-count">0回</strong></article>
+          <article class="mini-card"><span>次のガチャまで</span><strong id="next-gacha">5個</strong></article>
+        </div>
+      </section>
+
+      <dialog id="timer-control-dialog" class="timer-control-dialog">
+        <button id="close-timer-control" class="timer-control-close" type="button" aria-label="タイマーメニューを閉じる">×</button>
+        <article id="timer-workspace" class="timer-workspace">
+          <img id="timer-companion-image" src="assets/companion-streamer-01.webp" alt="作業を一緒にする配信中の女の子" />
+          <div class="timer-workspace-shade"></div>
+          <div class="timer-live-label"><span class="status-dot"></span>FOCUS LIVE</div>
+          <article class="timer-panel">
+            <div class="timer-kind-tabs" role="tablist" aria-label="計測方法">
+              <button class="timer-kind-tab active" data-timer-kind="pomodoro">ポモドーロ</button>
+              <button class="timer-kind-tab" data-timer-kind="stopwatch">ストップウォッチ</button>
+            </div>
+            <div id="pomodoro-mode-tabs" class="mode-tabs" role="tablist" aria-label="ポモドーロモード">
+              <button class="mode-tab active" data-mode="focus">集中</button>
+              <button class="mode-tab" data-mode="break">休憩</button>
+            </div>
+            <p id="session-label" class="eyebrow">FOCUS SESSION</p>
+            <div id="timer-display" class="timer-display">25:00</div>
+            <div class="progress-track"><div id="timer-progress"></div></div>
+            <p id="timer-note" class="timer-note">完了すると <strong>5オーブ</strong> 獲得</p>
+            <div class="timer-actions">
+              <button id="reset-timer" class="secondary-button">リセット</button>
+              <button id="start-timer" class="primary-button">スタート</button>
+            </div>
+            <button id="open-timer-settings" class="text-button">時間を設定する</button>
+          </article>
+        </article>
+      </dialog>
+
+      <section id="tasks-page" class="page">
+        <div class="page-heading">
+          <div><p class="eyebrow">MY TASKS</p><h1>今日やること</h1></div>
+          <span id="task-progress-label">0 / 0 完了</span>
+        </div>
+        <form id="task-form" class="add-form card">
+          <input id="task-input" maxlength="80" placeholder="新しいタスクを入力…" required />
+          <input id="task-date" type="date" aria-label="期限" />
+          <button class="primary-button" type="submit">追加</button>
+        </form>
+        <div id="task-list" class="task-list"></div>
+      </section>
+
+      <section id="calendar-page" class="page">
+        <div class="page-heading">
+          <div><p class="eyebrow">FOCUS LOG</p><h1 id="calendar-title">カレンダー</h1></div>
+          <div><button id="prev-month" class="icon-button">‹</button><button id="next-month" class="icon-button">›</button></div>
+        </div>
+        <article class="calendar-card card">
+          <div class="week-row"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+          <div id="calendar-grid" class="calendar-grid"></div>
+        </article>
+        <div class="calendar-legend"><i></i> 集中セッションを完了した日</div>
+      </section>
+
+      <section id="gacha-page" class="page">
+        <div class="gacha-hero">
+          <div class="gacha-copy">
+            <p class="eyebrow">FOCUS REWARD</p>
+            <h1>星明かりの<br />仲間たち</h1>
+            <p>集中して集めたオーブで、<br />新しい作業仲間と出会おう。</p>
+          </div>
+          <div id="gacha-preview" class="gacha-preview">✦</div>
+        </div>
+        <div class="gacha-actions">
+          <button id="pull-gacha" class="gacha-button"><span>1回引く</span><small>◈ 5</small></button>
+          <button id="open-register-character" class="secondary-button">キャラクターを登録</button>
+        </div>
+        <div class="collection-heading"><h2>コレクション</h2><span id="collection-count">0 / 0</span></div>
+        <div id="collection-grid" class="collection-grid"></div>
+      </section>
+
+      <section id="settings-page" class="page">
+        <div class="page-heading"><div><p class="eyebrow">PREFERENCES</p><h1>設定</h1></div></div>
+        <div class="settings-list card">
+          <button id="settings-timer-row" class="setting-row"><span><b>ポモドーロ時間</b><small>集中と休憩の長さ</small></span><strong id="settings-time-value">25分 / 5分</strong></button>
+          <button id="settings-theme-row" class="setting-row"><span><b>表示テーマ</b><small>ライト／ダーク</small></span><strong id="settings-theme-value">ダーク</strong></button>
+          <button id="settings-image-row" class="setting-row"><span><b>作業相棒の画像</b><small>画像は端末内に保存・自動圧縮</small></span><strong>変更 ›</strong></button>
+          <button id="settings-pack-row" class="setting-row"><span><b>召喚ライブラリ</b><small>キャラクターパック管理</small></span><strong id="settings-pack-count">0パック ›</strong></button>
+          <button id="settings-rates-row" class="setting-row"><span><b>ガチャ排出率</b><small>レアリティごとの提供割合</small></span><strong>確認 ›</strong></button>
+          <button id="settings-backup-row" class="setting-row"><span><b>バックアップと復元</b><small>画像・パックを含む全データ</small></span><strong>管理 ›</strong></button>
+          <button id="reset-data" class="setting-row danger"><span><b>データをリセット</b><small>タスク・履歴・オーブを初期化</small></span><strong>実行 ›</strong></button>
+        </div>
+        <p class="privacy-note">通常は端末内だけに保存されます。バックアップを作成した場合のみ、選んだ保存先へデータが渡されます。</p>
+      </section>
+    </main>
+
+    <div id="menu-backdrop" class="menu-backdrop"></div>
+    <nav id="app-menu" class="app-menu" aria-label="メインメニュー" aria-hidden="true">
+      <div class="app-menu-heading">
+        <div><small>QUESTIA MENU</small><b>メニュー</b></div>
+        <button id="menu-close" class="icon-button" type="button" aria-label="メニューを閉じる">×</button>
+      </div>
+      <div class="app-menu-items">
+        <button class="menu-item active" data-page="focus"><span>✦</span><div><b>集中ホーム</b><small>作業相棒と過ごす</small></div><i>›</i></button>
+        <button class="menu-item" data-page="tasks"><span>✓</span><div><b>ToDo</b><small>今日やること</small></div><i>›</i></button>
+        <button class="menu-item" data-page="calendar"><span>▦</span><div><b>カレンダー</b><small>集中記録を見る</small></div><i>›</i></button>
+        <button class="menu-item" data-page="gacha"><span>⬡</span><div><b>ガチャ</b><small>召喚とコレクション</small></div><i>›</i></button>
+        <button class="menu-item" data-page="settings"><span>⚙</span><div><b>設定</b><small>時間・画像・パック管理</small></div><i>›</i></button>
+      </div>
+      <div class="app-menu-orbs"><span>◈ 所持オーブ</span><strong id="menu-orb-count">0</strong></div>
+    </nav>
+  </div>
+
+  <dialog id="timer-dialog">
+    <form method="dialog" id="timer-settings-form">
+      <div class="dialog-heading"><h2>タイマー設定</h2><button value="cancel" class="icon-button">×</button></div>
+      <label>集中時間（分）<input id="focus-minutes" type="number" min="1" max="180" value="25" /></label>
+      <label>休憩時間（分）<input id="break-minutes" type="number" min="1" max="60" value="5" /></label>
+      <button id="save-timer-settings" value="default" class="primary-button">保存</button>
+    </form>
+  </dialog>
+
+  <dialog id="timer-signal-dialog" class="timer-signal-dialog">
+    <div id="timer-signal-icon" class="timer-signal-icon" aria-hidden="true">✦</div>
+    <p id="timer-signal-eyebrow" class="eyebrow">SESSION COMPLETE</p>
+    <h2 id="timer-signal-title">集中完了！</h2>
+    <p id="timer-signal-message">5オーブ獲得。休憩を始めます。</p>
+    <button id="close-timer-signal" type="button" class="primary-button">OK</button>
+  </dialog>
+
+  <dialog id="gacha-rates-dialog">
+    <div class="dialog-heading"><div><p class="eyebrow">DROP RATES</p><h2>ガチャ排出率</h2></div><button id="close-gacha-rates" type="button" class="icon-button" aria-label="排出率を閉じる">×</button></div>
+    <div class="gacha-rate-list">
+      <div class="ssr"><span><b>SSR</b><small>スペシャルレア</small></span><strong>5%</strong></div>
+      <div class="sr"><span><b>SR</b><small>スーパーレア</small></span><strong>28%</strong></div>
+      <div class="r"><span><b>R</b><small>レア</small></span><strong>67%</strong></div>
+    </div>
+    <p class="gacha-rate-note">同じレアリティの中では、まだ出会っていないキャラクターが少し出やすくなります。</p>
+  </dialog>
+
+  <dialog id="character-dialog">
+    <form method="dialog" id="character-form">
+      <div class="dialog-heading"><h2>キャラクター登録</h2><button id="close-character-dialog" type="button" class="icon-button" aria-label="キャンセルして閉じる">×</button></div>
+      <label>名前<input id="character-name" maxlength="24" required placeholder="例：ルナ" /></label>
+      <label>レアリティ<select id="character-rarity"><option>R</option><option>SR</option><option>SSR</option></select></label>
+      <label class="file-drop">イラストを選択<input id="character-image-input" type="file" accept="image/*" required /><span>PNG / JPEG / WebP（自動圧縮）</span></label>
+      <div class="dialog-actions">
+        <button id="cancel-character" type="button" class="secondary-button">キャンセル</button>
+        <button id="save-character" value="default" class="primary-button">ガチャに追加</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="gacha-animation-dialog" class="gacha-animation-dialog">
+    <button id="close-gacha-animation" class="animation-close" aria-label="演出を閉じる">×</button>
+    <div id="gacha-stage" class="gacha-stage">
+      <div class="spark-field" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <p id="gacha-instruction" class="gacha-instruction">ガチャをまわしてキャラを出せ♡</p>
+      <div class="arcane-machine">
+        <img src="assets/gacha-machine.webp" alt="黄金と群青の魔導ガチャ機" />
+        <div class="arcane-vignette" aria-hidden="true"></div>
+        <div class="magic-ring ring-one" aria-hidden="true"></div>
+        <div class="magic-ring ring-two" aria-hidden="true"></div>
+        <div class="arcane-core" aria-hidden="true">✦</div>
+        <div id="summon-orb" class="summon-orb" aria-hidden="true">
+          <span class="orb-glyph">✦</span>
+          <i></i><i></i><i></i>
+        </div>
+        <button id="turn-gacha" class="arcane-activate">
+          <span class="activate-rune">✦</span>
+          <span><b>ガチャをまわす</b><small>ORB 5</small></span>
+        </button>
+      </div>
+      <div class="energy-streaks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="reveal-flash" aria-hidden="true"></div>
+    </div>
+  </dialog>
+
+  <dialog id="result-dialog" class="result-dialog">
+    <div id="result-glow"></div>
+    <p id="result-rarity">SSR</p>
+    <div id="result-art" class="result-art">✦</div>
+    <h2 id="result-name">キャラクター名</h2>
+    <p id="result-message">新しい作業仲間と出会いました</p>
+    <div class="result-actions">
+      <button id="close-result" type="button" class="secondary-button">コレクションへ</button>
+      <button id="pull-again" type="button" class="primary-button">続けて回す <small>◈ 5</small></button>
+    </div>
+  </dialog>
+
+  <dialog id="character-detail-dialog" class="character-detail-dialog">
+    <button id="close-character-detail-x" class="detail-close icon-button" type="button" aria-label="キャラクター詳細を閉じる">×</button>
+    <div id="detail-glow" class="detail-glow"></div>
+    <p id="detail-rarity" class="detail-rarity">SSR</p>
+    <div id="detail-art" class="detail-art"></div>
+    <h2 id="detail-name">キャラクター名</h2>
+    <p id="detail-caption" class="detail-caption">獲得済みの作業仲間</p>
+    <button id="close-character-detail" type="button" class="secondary-button">閉じる</button>
+  </dialog>
+
+  <dialog id="pack-manager-dialog" class="pack-manager-dialog">
+    <div class="dialog-heading">
+      <div><p class="eyebrow">SUMMON LIBRARY</p><h2>キャラクターパック管理</h2></div>
+      <button id="close-pack-manager" type="button" class="icon-button" aria-label="パック管理を閉じる">×</button>
+    </div>
+    <p class="pack-manager-intro">追加パックを端末へインストールすると、オフラインでもガチャから仲間を召喚できます。</p>
+    <label id="pack-drop-zone" class="pack-drop-zone">
+      <span class="pack-drop-icon">⬡</span>
+      <b>キャラクターパックを追加</b>
+      <small>.questiapack または .zip</small>
+      <input id="pack-file-input" type="file" accept=".questiapack,.zip,application/zip" />
+    </label>
+    <div id="pack-status" class="pack-status" role="status" aria-live="polite"></div>
+    <div class="pack-list-heading"><h3>インストール済み</h3><span id="pack-storage-total">0 MB</span></div>
+    <div id="installed-pack-list" class="installed-pack-list"></div>
+  </dialog>
+
+  <dialog id="pack-preview-dialog" class="pack-preview-dialog">
+    <div class="dialog-heading">
+      <div><p class="eyebrow">PACK INSPECTION</p><h2 id="pack-preview-name">パック確認</h2></div>
+      <button id="cancel-pack-install-x" type="button" class="icon-button" aria-label="インストールをキャンセル">×</button>
+    </div>
+    <div id="pack-preview-state" class="pack-preview-state">新規インストール</div>
+    <dl class="pack-metadata">
+      <div><dt>パックID</dt><dd id="pack-preview-id"></dd></div>
+      <div><dt>作者</dt><dd id="pack-preview-author"></dd></div>
+      <div><dt>バージョン</dt><dd id="pack-preview-version"></dd></div>
+      <div><dt>キャラクター</dt><dd id="pack-preview-count"></dd></div>
+      <div><dt>必要容量</dt><dd id="pack-preview-size"></dd></div>
+      <div><dt>対応バージョン</dt><dd id="pack-preview-minimum"></dd></div>
+    </dl>
+    <p id="pack-preview-description" class="pack-preview-description"></p>
+    <div id="pack-preview-warning" class="pack-preview-warning"></div>
+    <div id="pack-preview-characters" class="pack-preview-characters"></div>
+    <div class="dialog-actions">
+      <button id="cancel-pack-install" type="button" class="secondary-button">キャンセル</button>
+      <button id="confirm-pack-install" type="button" class="primary-button">インストール</button>
+    </div>
+  </dialog>
+
+  <dialog id="backup-dialog" class="backup-dialog">
+    <div class="dialog-heading">
+      <div><p class="eyebrow">DATA SAFETY</p><h2>バックアップと復元</h2></div>
+      <button id="close-backup-dialog" type="button" class="icon-button" aria-label="バックアップ画面を閉じる">×</button>
+    </div>
+    <p class="backup-intro">オーブ、設定、ToDo、作業記録、登録キャラクター、画像、キャラクターパックを1つのファイルにまとめます。</p>
+    <div id="backup-status" class="backup-status" role="status" aria-live="polite">
+      <span class="backup-status-icon">◈</span>
+      <div><b>バックアップを準備しています</b><small>端末内のデータを確認中です</small></div>
+    </div>
+    <div class="backup-actions">
+      <button id="download-backup" type="button" class="secondary-button" disabled>端末に書き出す</button>
+      <button id="share-backup" type="button" class="primary-button" disabled>Google Driveなどに保存</button>
+    </div>
+    <p class="backup-cloud-note">「Google Driveなどに保存」は端末の共有画面を開きます。共有先からGoogle Drive、Dropbox、OneDriveなどを選べます。</p>
+    <div class="backup-divider"><span>復元</span></div>
+    <label class="backup-import">
+      <span class="backup-import-icon">↥</span>
+      <b>バックアップを読み込む</b>
+      <small>端末またはクラウドストレージから .questiabackup を選択</small>
+      <input id="backup-file-input" type="file" accept=".questiabackup,application/json" />
+    </label>
+    <p class="backup-warning">読み込むと現在のデータはすべて、バックアップ時点の内容に置き換わります。</p>
+  </dialog>
+
+  <input id="companion-input" type="file" accept="image/*" hidden />
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="character-packs.js?v=35"></script>
+  <script src="app.js?v=35"></script>
+</body>
+</html>
