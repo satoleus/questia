@@ -9,6 +9,7 @@
   --accent: #ffcc70;
   --accent-2: #ffdca0;
   --blue: #6ea6ff;
+  --ambient: rgba(255,204,112,.16);
   --danger: #ff7e83;
   --shadow: 0 20px 50px rgba(0,0,0,.3);
 }
@@ -30,7 +31,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 85% 5%, rgba(75,105,170,.18), transparent 28rem),
+    radial-gradient(circle at 85% 5%, var(--ambient), transparent 28rem),
     var(--bg);
   color: var(--text);
   font-family: Inter, "Noto Sans JP", system-ui, -apple-system, sans-serif;
@@ -94,7 +95,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .focus-timer-badge:hover { filter: brightness(1.1); }
 .status-bubble { position: absolute; left: 24px; bottom: 24px; max-width: calc(100% - 150px); padding: 13px 17px; border-radius: 18px; background: rgba(12,18,31,.72); backdrop-filter: blur(12px); color: white; font-size: 14px; }
 .status-dot { display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: #83e7a9; box-shadow: 0 0 0 5px rgba(131,231,169,.13); }
-.glass-button { position: absolute; right: 20px; bottom: 24px; border: 1px solid rgba(255,255,255,.25); color: white; background: rgba(12,18,31,.55); backdrop-filter: blur(8px); padding: 11px 14px; border-radius: 14px; cursor: pointer; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 26px; box-shadow: var(--shadow); }
 .timer-workspace {
   --timer-progress: 0%;
@@ -187,6 +187,13 @@ input, select { min-height: 48px; padding: 0 15px; border-radius: 13px; border: 
 .gacha-copy h1 { font-size: clamp(42px, 7vw, 72px); }
 .gacha-copy > p:not(.eyebrow) { color: #d8d9e7; line-height: 1.8; }
 .gacha-preview { z-index: 1; display: grid; place-items: center; font-size: 170px; color: var(--accent); filter: drop-shadow(0 0 35px rgba(255,211,119,.7)); }
+.gacha-source-selector { width: min(620px, 100%); min-height: 82px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; margin: 18px auto 0; padding: 13px 17px; color: var(--text); text-align: left; cursor: pointer; }
+.gacha-source-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; background: color-mix(in srgb, var(--accent) 15%, var(--panel-soft)); color: var(--accent); font-size: 21px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent); }
+.gacha-source-copy { display: grid; min-width: 0; gap: 2px; }
+.gacha-source-copy small { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+.gacha-source-copy b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; }
+.gacha-source-copy em { overflow: hidden; color: var(--muted); font-size: 11px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+.gacha-source-selector > strong { color: var(--muted); font-size: 12px; }
 .gacha-actions { display: flex; justify-content: center; gap: 12px; margin: 24px 0 38px; }
 .gacha-button { min-width: 220px; min-height: 62px; background: linear-gradient(135deg, #ffe3a8, #ffbd59); color: #27202d; box-shadow: 0 12px 30px rgba(255,191,91,.2); }
 .gacha-button span, .gacha-button small { display: block; }
@@ -219,6 +226,8 @@ input, select { min-height: 48px; padding: 0 15px; border-radius: 13px; border: 
 .setting-row span { display: grid; gap: 5px; }
 .setting-row small { color: var(--muted); }
 .setting-row strong { color: var(--muted); font-size: 13px; }
+.setting-theme-value { display: flex; align-items: center; gap: 7px; }
+.setting-theme-value i { width: 12px; height: 12px; border: 2px solid color-mix(in srgb, var(--accent) 45%, white); border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 13%, transparent); }
 .setting-row.danger b, .setting-row.danger strong { color: var(--danger); }
 .privacy-note { color: var(--muted); font-size: 12px; text-align: center; margin: 22px; }
 
@@ -266,6 +275,45 @@ dialog label { display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
 .timer-signal-dialog .primary-button { width: 100%; }
 .timer-signal-dialog.break-finished { --signal-color: #83c8ff; }
 @keyframes timer-signal-pulse { to { transform: scale(1.08); filter: brightness(1.12); } }
+.appearance-dialog { width: min(500px, calc(100% - 24px)); max-height: min(780px, calc(100dvh - 24px)); overflow-y: auto; }
+.appearance-dialog .eyebrow { margin: 0 0 5px; }
+.appearance-section-label { margin: 22px 0 9px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+.appearance-section-label.color-label { margin-top: 20px; }
+.appearance-theme-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.appearance-theme-option { min-height: 62px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel-soft); color: var(--text); text-align: left; cursor: pointer; }
+.appearance-theme-option > span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 12px; background: var(--panel); font-size: 17px; }
+.appearance-theme-option > i { display: grid; place-items: center; width: 21px; height: 21px; border-radius: 50%; background: var(--accent); color: #172035; font-style: normal; opacity: 0; transform: scale(.65); transition: .18s; }
+.appearance-theme-option.selected { border-color: color-mix(in srgb, var(--accent) 58%, var(--line)); background: color-mix(in srgb, var(--accent) 9%, var(--panel-soft)); }
+.appearance-theme-option.selected > i { opacity: 1; transform: none; }
+.color-theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.color-theme-option { min-height: 76px; display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 11px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel-soft); color: var(--text); text-align: left; cursor: pointer; }
+.color-theme-option:hover { border-color: color-mix(in srgb, var(--color-swatch) 52%, var(--line)); }
+.color-theme-option > i { width: 36px; height: 36px; border: 3px solid color-mix(in srgb, var(--color-swatch) 42%, white); border-radius: 50%; background: var(--color-swatch); box-shadow: inset 0 2px 5px rgba(255,255,255,.35), 0 5px 14px color-mix(in srgb, var(--color-swatch) 30%, transparent); }
+.color-theme-option > span { display: grid; gap: 2px; }
+.color-theme-option small { color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: .12em; }
+.color-theme-option > strong { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--color-swatch); color: #172035; opacity: 0; transform: scale(.65); transition: .18s; }
+.color-theme-option.selected { border-color: color-mix(in srgb, var(--color-swatch) 65%, var(--line)); background: color-mix(in srgb, var(--color-swatch) 10%, var(--panel-soft)); box-shadow: 0 8px 22px color-mix(in srgb, var(--color-swatch) 10%, transparent); }
+.color-theme-option.selected > strong { opacity: 1; transform: none; }
+.companion-picker-dialog { width: min(620px, calc(100% - 24px)); max-height: min(820px, calc(100dvh - 24px)); overflow-y: auto; }
+.companion-picker-dialog .eyebrow { margin: 0 0 5px; }
+.companion-picker-intro { margin: 18px 0 15px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.companion-preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.companion-preset-option { position: relative; overflow: hidden; padding: 0; border: 2px solid transparent; border-radius: 16px; background: var(--panel-soft); color: white; text-align: left; cursor: pointer; }
+.companion-preset-option img { width: 100%; aspect-ratio: 4 / 3; display: block; object-fit: cover; transition: transform .25s; }
+.companion-preset-option:hover img { transform: scale(1.025); }
+.companion-preset-option > span { position: absolute; inset: auto 0 0; display: grid; gap: 1px; padding: 24px 11px 10px; background: linear-gradient(transparent, rgba(4,9,20,.9)); }
+.companion-preset-option b { font-size: 12px; }
+.companion-preset-option small { color: rgba(255,255,255,.68); font-size: 8px; letter-spacing: .08em; }
+.companion-preset-option > strong { position: absolute; right: 9px; top: 9px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #172035; opacity: 0; transform: scale(.65); transition: .18s; }
+.companion-preset-option.selected { border-color: var(--accent); box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 18%, transparent); }
+.companion-preset-option.selected > strong { opacity: 1; transform: none; }
+.companion-custom-button { width: 100%; min-height: 72px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 12px 14px; border: 1px dashed color-mix(in srgb, var(--accent) 50%, var(--line)); border-radius: 16px; background: color-mix(in srgb, var(--accent) 5%, var(--panel-soft)); color: var(--text); text-align: left; cursor: pointer; }
+.companion-custom-button > span:first-child { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 14px; background: color-mix(in srgb, var(--accent) 14%, var(--panel)); color: var(--accent); font-size: 22px; }
+.companion-custom-button > span:nth-child(2) { display: grid; gap: 3px; }
+.companion-custom-button small { color: var(--muted); font-size: 9px; }
+.companion-custom-button > strong { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; background: var(--accent); color: #172035; opacity: 0; }
+.companion-custom-button.selected { border-style: solid; border-color: var(--accent); }
+.companion-custom-button.selected > strong { opacity: 1; }
 .gacha-rate-list { display: grid; gap: 10px; margin: 22px 0 16px; }
 .gacha-rate-list > div { display: flex; align-items: center; justify-content: space-between; min-height: 66px; padding: 12px 17px; border: 1px solid var(--line); border-radius: 15px; background: var(--panel-soft); }
 .gacha-rate-list span { display: grid; gap: 2px; }
@@ -276,6 +324,20 @@ dialog label { display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
 .gacha-rate-list .sr strong, .gacha-rate-list .sr b { color: #c691ff; }
 .gacha-rate-list .r strong, .gacha-rate-list .r b { color: #72bcff; }
 .gacha-rate-note { line-height: 1.7; }
+.gacha-rates-source { margin: 18px 0 -8px; color: var(--accent); font-size: 12px; font-weight: 800; }
+.gacha-source-dialog { width: min(560px, calc(100% - 24px)); max-height: min(760px, calc(100dvh - 24px)); overflow-y: auto; }
+.gacha-source-dialog .eyebrow { margin: 0 0 5px; }
+.gacha-source-intro { margin: 18px 0 15px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.gacha-source-list { display: grid; gap: 9px; }
+.gacha-source-option { width: 100%; min-height: 78px; display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel-soft); color: var(--text); text-align: left; cursor: pointer; }
+.gacha-source-option:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.gacha-source-option > i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 14px; background: var(--panel); color: var(--accent); font-style: normal; }
+.gacha-source-option > span { display: grid; min-width: 0; gap: 3px; }
+.gacha-source-option b, .gacha-source-option small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gacha-source-option small { color: var(--muted); font-size: 10px; }
+.gacha-source-option > strong { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; background: var(--accent); color: #172035; opacity: 0; transform: scale(.65); transition: .18s; }
+.gacha-source-option.selected { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); background: color-mix(in srgb, var(--accent) 9%, var(--panel-soft)); }
+.gacha-source-option.selected > strong { opacity: 1; transform: none; }
 .gacha-animation-dialog {
   width: min(520px, 100%);
   max-width: none;
@@ -502,6 +564,14 @@ dialog label { display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
 .pack-manager-dialog, .pack-preview-dialog { width: min(620px, calc(100% - 24px)); max-height: min(820px, calc(100dvh - 24px)); overflow-y: auto; }
 .pack-manager-dialog .eyebrow, .pack-preview-dialog .eyebrow { margin: 0 0 5px; }
 .pack-manager-intro, .pack-preview-description { color: var(--muted); font-size: 13px; line-height: 1.7; }
+.pack-mix-setting { min-height: 76px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; margin: 16px 0; padding: 13px 15px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel-soft); cursor: pointer; }
+.pack-mix-setting > span { display: grid; gap: 4px; color: var(--text); }
+.pack-mix-setting small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.pack-mix-setting input { position: absolute; opacity: 0; pointer-events: none; }
+.pack-mix-setting > i { position: relative; width: 46px; height: 26px; border-radius: 15px; background: var(--line); transition: .2s; }
+.pack-mix-setting > i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; box-shadow: 0 2px 7px rgba(0,0,0,.25); transition: .2s; }
+.pack-mix-setting input:checked + i { background: var(--accent); }
+.pack-mix-setting input:checked + i::after { transform: translateX(20px); }
 .pack-drop-zone {
   min-height: 145px; margin: 20px 0 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;
   border: 1px dashed color-mix(in srgb, var(--blue) 60%, var(--line)); border-radius: 20px; cursor: pointer;
@@ -589,10 +659,14 @@ dialog label { display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
   .add-form input:first-child { grid-column: 1 / -1; }
   .gacha-hero { grid-template-columns: 1fr; min-height: 450px; padding: 28px; }
   .gacha-preview { font-size: 110px; }
+  .gacha-source-selector { margin-top: 14px; }
   .gacha-actions { flex-direction: column; }
   .day { min-height: 67px; padding: 7px; font-size: 13px; }
   .day .focus-mark { left: 6px; bottom: 5px; font-size: 9px; }
   .pack-manager-dialog, .pack-preview-dialog { padding: 19px; }
+  .appearance-dialog { padding: 20px; }
+  .color-theme-grid { grid-template-columns: 1fr; }
+  .companion-picker-dialog { padding: 20px; }
   .pack-metadata { grid-template-columns: 1fr; }
   .installed-pack { grid-template-columns: 1fr; }
   .pack-card-actions { flex-direction: row; }

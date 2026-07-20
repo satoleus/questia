@@ -7,6 +7,25 @@ const BACKUP_FORMAT = "questia-backup";
 const BACKUP_SCHEMA_VERSION = 1;
 const BACKUP_MAX_BYTES = 512 * 1024 * 1024;
 const MEDIA_STORES = [MEDIA_STORE_NAME, "packs", "pack-characters", "pack-assets"];
+const COLOR_THEMES = Object.freeze({
+  sky: { label: "水色", accent: "#74c9ff", accent2: "#b9e8ff", ambient: "rgba(82,182,255,.18)" },
+  pink: { label: "ピンク", accent: "#ff8fc5", accent2: "#ffc4df", ambient: "rgba(255,105,178,.17)" },
+  orange: { label: "オレンジ", accent: "#ff9d62", accent2: "#ffc6a3", ambient: "rgba(255,128,68,.17)" },
+  yellow: { label: "イエロー", accent: "#ffcc70", accent2: "#ffe0a6", ambient: "rgba(255,190,72,.16)" },
+  mint: { label: "ミント", accent: "#72d8ba", accent2: "#b0eddc", ambient: "rgba(75,201,165,.16)" },
+  purple: { label: "パープル", accent: "#aa9cff", accent2: "#d1caff", ambient: "rgba(133,112,255,.17)" },
+  brown: { label: "ブラウン", accent: "#c99568", accent2: "#e3bd9b", ambient: "rgba(174,112,66,.17)" },
+  silver: { label: "シルバー", accent: "#b9c4d1", accent2: "#dce3ea", ambient: "rgba(157,174,194,.17)" }
+});
+const COMPANION_PRESETS = Object.freeze([
+  { id: "01", name: "星夜の配信者", caption: "ORIGINAL", src: "assets/companion-streamer-01.webp" },
+  { id: "02", name: "ブルールーム", caption: "GIRL", src: "assets/companion-02.webp" },
+  { id: "03", name: "夜更かしパートナー", caption: "BOY", src: "assets/companion-03.webp" },
+  { id: "04", name: "ねこみみルーム", caption: "CAT GIRL", src: "assets/companion-04.webp" },
+  { id: "05", name: "いぬみみルーム", caption: "DOG GIRL", src: "assets/companion-05.webp" },
+  { id: "07", name: "子猫の相棒", caption: "KITTEN", src: "assets/companion-07.webp" },
+  { id: "08", name: "子犬の相棒", caption: "PUPPY", src: "assets/companion-08.webp" }
+]);
 
 const initialState = {
   orbs: 100,
@@ -23,7 +42,15 @@ const initialState = {
   pullCounts: {},
   collectionSnapshots: {},
   customCharacters: [],
-  settings: { focusMinutes: 25, breakMinutes: 5, theme: "dark" },
+  settings: {
+    focusMinutes: 25,
+    breakMinutes: 5,
+    theme: "dark",
+    colorTheme: "yellow",
+    gachaSource: "standard",
+    includePacksInStandard: true
+  },
+  companionPreset: "01",
   companionImage: null
 };
 
@@ -442,9 +469,29 @@ function switchPage(page) {
 }
 
 function applyTheme() {
+  const colorName = COLOR_THEMES[state.settings.colorTheme] ? state.settings.colorTheme : "yellow";
+  const color = COLOR_THEMES[colorName];
+  state.settings.colorTheme = colorName;
   document.body.classList.toggle("light", state.settings.theme === "light");
+  document.body.dataset.colorTheme = colorName;
+  document.documentElement.style.setProperty("--accent", color.accent);
+  document.documentElement.style.setProperty("--accent-2", color.accent2);
+  document.documentElement.style.setProperty("--blue", color.accent);
+  document.documentElement.style.setProperty("--ambient", color.ambient);
   $("#theme-toggle").textContent = state.settings.theme === "light" ? "☀" : "☾";
-  $("#settings-theme-value").textContent = state.settings.theme === "light" ? "ライト" : "ダーク";
+  $("#settings-theme-value").textContent = `${state.settings.theme === "light" ? "ライト" : "ダーク"}・${color.label}`;
+  $$(".appearance-theme-option").forEach(option => {
+    const selected = option.dataset.appearanceTheme === state.settings.theme;
+    option.classList.toggle("selected", selected);
+    option.setAttribute("role", "radio");
+    option.setAttribute("aria-checked", String(selected));
+  });
+  $$(".color-theme-option").forEach(option => {
+    const selected = option.dataset.colorTheme === colorName;
+    option.classList.toggle("selected", selected);
+    option.setAttribute("role", "radio");
+    option.setAttribute("aria-checked", String(selected));
+  });
   document.querySelector('meta[name="theme-color"]').content = state.settings.theme === "light" ? "#f5f2ed" : "#14203a";
 }
 
@@ -452,6 +499,22 @@ function toggleTheme() {
   state.settings.theme = state.settings.theme === "dark" ? "light" : "dark";
   saveState();
   applyTheme();
+}
+
+function setAppearanceTheme(theme) {
+  if (!["light", "dark"].includes(theme)) return;
+  state.settings.theme = theme;
+  saveState();
+  applyTheme();
+  toast(`表示テーマを${theme === "light" ? "ライト" : "ダーク"}に変更しました`);
+}
+
+function setColorTheme(colorName) {
+  if (!COLOR_THEMES[colorName]) return;
+  state.settings.colorTheme = colorName;
+  saveState();
+  applyTheme();
+  toast(`カラーモードを${COLOR_THEMES[colorName].label}に変更しました`);
 }
 
 function formatTime(seconds) {
@@ -826,11 +889,104 @@ function allCharacters() {
   return [...available, ...missing];
 }
 
-function gachaCharacters() {
+function enabledPackById(packId) {
+  return installedPacks.find(pack => pack.packId === packId && pack.enabled !== false) || null;
+}
+
+function gachaCharactersForSource(source = state.settings.gachaSource) {
+  if (source?.startsWith("pack:")) {
+    const packId = source.slice(5);
+    if (!enabledPackById(packId)) return [];
+    return packCharacters.filter(character => character.packId === packId && character.packEnabled !== false);
+  }
   return [
     ...state.customCharacters,
-    ...packCharacters.filter(character => character.packEnabled !== false)
+    ...(state.settings.includePacksInStandard
+      ? packCharacters.filter(character => character.packEnabled !== false)
+      : [])
   ];
+}
+
+function gachaCharacters() {
+  return gachaCharactersForSource(state.settings.gachaSource);
+}
+
+function ensureValidGachaSource() {
+  const source = state.settings.gachaSource || "standard";
+  if (source === "standard") return false;
+  const packId = source.startsWith("pack:") ? source.slice(5) : "";
+  if (packId && enabledPackById(packId)) return false;
+  state.settings.gachaSource = "standard";
+  saveState();
+  return true;
+}
+
+function gachaSourceInfo(source = state.settings.gachaSource) {
+  if (source?.startsWith("pack:")) {
+    const packId = source.slice(5);
+    const pack = enabledPackById(packId);
+    if (pack) {
+      const count = gachaCharactersForSource(source).length;
+      return {
+        source,
+        name: pack.name,
+        detail: `${count}体・${pack.author || "キャラクターパック"}`,
+        icon: "⬡"
+      };
+    }
+  }
+  const count = gachaCharactersForSource("standard").length;
+  return {
+    source: "standard",
+    name: "標準ガチャ",
+    detail: state.settings.includePacksInStandard
+      ? `${count}体・登録キャラ＋有効パック`
+      : `${count}体・登録キャラクターのみ`,
+    icon: "✦"
+  };
+}
+
+function renderGachaSourceList() {
+  const list = $("#gacha-source-list");
+  if (!list) return;
+  list.innerHTML = "";
+  const sources = [
+    gachaSourceInfo("standard"),
+    ...installedPacks
+      .filter(pack => pack.enabled !== false)
+      .map(pack => gachaSourceInfo(`pack:${pack.packId}`))
+  ];
+  sources.forEach(info => {
+    const selected = info.source === state.settings.gachaSource;
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = `gacha-source-option${selected ? " selected" : ""}`;
+    option.setAttribute("role", "radio");
+    option.setAttribute("aria-checked", String(selected));
+    option.innerHTML = `<i>${info.icon}</i><span><b>${escapeHtml(info.name)}</b><small>${escapeHtml(info.detail)}</small></span><strong>✓</strong>`;
+    option.addEventListener("click", () => selectGachaSource(info.source));
+    list.append(option);
+  });
+}
+
+function renderGachaSource() {
+  ensureValidGachaSource();
+  const info = gachaSourceInfo();
+  $("#gacha-source-name").textContent = info.name;
+  $("#gacha-source-detail").textContent = info.detail;
+  $(".gacha-source-icon").textContent = info.icon;
+  $("#include-packs-standard").checked = state.settings.includePacksInStandard !== false;
+  renderGachaSourceList();
+  renderGachaRates();
+}
+
+function selectGachaSource(source) {
+  if (source !== "standard" && !gachaCharactersForSource(source).length) return;
+  state.settings.gachaSource = source;
+  saveState();
+  renderGachaSource();
+  $("#gacha-source-dialog").close();
+  toast(`${gachaSourceInfo().name}を選択しました`);
 }
 
 function snapshotCharacter(character) {
@@ -891,6 +1047,7 @@ async function loadPackLibrary() {
     $("#settings-pack-count").textContent = `${installedPacks.length}パック ›`;
     renderInstalledPacks();
     renderCollection();
+    renderGachaSource();
   } catch (error) {
     console.error("Character pack loading failed", error);
     $("#settings-pack-count").textContent = "読込エラー ›";
@@ -965,6 +1122,7 @@ async function deleteCustomCharacter(char) {
   if (char.image?.startsWith("blob:")) URL.revokeObjectURL(char.image);
   await deleteCharacterImage(char.imageKey).catch(() => {});
   renderCollection();
+  renderGachaSource();
   toast(`「${char.name}」を削除しました`);
 }
 
@@ -1001,9 +1159,47 @@ function closeCharacterDetail() {
   $("#character-detail-dialog").close();
 }
 
-function rarityRoll() {
-  const value = Math.random() * 100;
-  return value < 5 ? "SSR" : value < 33 ? "SR" : "R";
+function effectiveRarityRates(characters = gachaCharacters()) {
+  const baseRates = { SSR: .05, SR: .28, R: .67 };
+  const available = new Set(characters.map(character => character.rarity));
+  const availableTotal = Object.entries(baseRates)
+    .filter(([rarity]) => available.has(rarity))
+    .reduce((sum, [, rate]) => sum + rate, 0);
+  return Object.fromEntries(
+    Object.entries(baseRates).map(([rarity, rate]) => [
+      rarity,
+      available.has(rarity) && availableTotal ? rate / availableTotal : 0
+    ])
+  );
+}
+
+function rarityRoll(characters) {
+  const rates = effectiveRarityRates(characters);
+  let point = Math.random();
+  for (const rarity of ["SSR", "SR", "R"]) {
+    point -= rates[rarity];
+    if (point <= 0) return rarity;
+  }
+  return ["R", "SR", "SSR"].find(rarity => rates[rarity] > 0) || null;
+}
+
+function formatRate(rate) {
+  const percent = rate * 100;
+  return `${Number.isInteger(percent) ? percent : percent.toFixed(1)}%`;
+}
+
+function renderGachaRates() {
+  const characters = gachaCharacters();
+  const rates = effectiveRarityRates(characters);
+  const info = gachaSourceInfo();
+  $("#gacha-rates-source").textContent = `${info.name}・${characters.length}体`;
+  $("#gacha-rate-ssr").textContent = formatRate(rates.SSR);
+  $("#gacha-rate-sr").textContent = formatRate(rates.SR);
+  $("#gacha-rate-r").textContent = formatRate(rates.R);
+  const missing = ["SSR", "SR", "R"].filter(rarity => !characters.some(character => character.rarity === rarity));
+  $("#gacha-rate-note").textContent = characters.length
+    ? `${missing.length ? `存在しないレアリティ（${missing.join("・")}）の確率は、存在するレアリティへ再配分されます。` : ""}同じレアリティの中では、まだ出会っていないキャラクターが少し出やすくなります。`
+    : "選択中のガチャには排出できるキャラクターがいません。";
 }
 
 function weightedCharacterDraw(pool) {
@@ -1027,7 +1223,7 @@ function weightedCharacterDraw(pool) {
 async function pullGacha() {
   await mediaReady;
   if (!gachaCharacters().length) {
-    toast("先にキャラクターを1体以上登録してください");
+    toast("選択中のガチャに排出できるキャラクターがいません");
     return;
   }
   if (state.orbs < GACHA_COST) {
@@ -1051,13 +1247,13 @@ function resetGachaAnimation() {
 
 function turnGacha() {
   const stage = $("#gacha-stage");
-  if (stage.classList.contains("spinning") || state.orbs < GACHA_COST || !gachaCharacters().length) return;
+  const candidates = gachaCharacters();
+  if (stage.classList.contains("spinning") || state.orbs < GACHA_COST || !candidates.length) return;
 
   state.orbs -= GACHA_COST;
-  const rarity = rarityRoll();
-  const pool = gachaCharacters().filter(c => c.rarity === rarity);
-  const fallbackPool = gachaCharacters();
-  const char = weightedCharacterDraw(pool.length ? pool : fallbackPool);
+  const rarity = rarityRoll(candidates);
+  const pool = candidates.filter(character => character.rarity === rarity);
+  const char = weightedCharacterDraw(pool);
   if (!state.owned.includes(char.id)) state.owned.push(char.id);
   state.pullCounts[char.id] = Number(state.pullCounts[char.id] || 0) + 1;
   state.collectionSnapshots[char.id] = snapshotCharacter(char);
@@ -1229,6 +1425,7 @@ async function saveCustomCharacter(event) {
     $("#character-dialog").close();
     event.target.reset();
     renderCollection();
+    renderGachaSource();
     toast("キャラクターをガチャに追加しました");
   } catch (error) {
     toast(error.message || "画像を登録できませんでした");
@@ -1243,15 +1440,70 @@ function closeCharacterDialog() {
   $("#character-dialog").close();
 }
 
+function selectedCompanionPreset() {
+  if (state.companionImage) return null;
+  return COMPANION_PRESETS.find(preset => preset.id === state.companionPreset) || COMPANION_PRESETS[0];
+}
+
+function companionSource() {
+  return state.companionImage || selectedCompanionPreset()?.src || COMPANION_PRESETS[0].src;
+}
+
+function applyCompanion() {
+  const source = companionSource();
+  $("#companion-image").src = source;
+  $("#timer-companion-image").src = source;
+  const preset = selectedCompanionPreset();
+  $("#settings-image-value").textContent = preset?.name || "端末の画像";
+}
+
+function renderCompanionPicker() {
+  const grid = $("#companion-preset-grid");
+  grid.innerHTML = "";
+  const selectedPreset = selectedCompanionPreset();
+  COMPANION_PRESETS.forEach(preset => {
+    const selected = selectedPreset?.id === preset.id;
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = `companion-preset-option${selected ? " selected" : ""}`;
+    option.setAttribute("role", "radio");
+    option.setAttribute("aria-checked", String(selected));
+    option.setAttribute("aria-label", `${preset.name}を選択`);
+    option.innerHTML = `<img src="${preset.src}" alt="" loading="lazy" decoding="async"><span><b>${escapeHtml(preset.name)}</b><small>${preset.caption}</small></span><strong>✓</strong>`;
+    option.addEventListener("click", () => selectCompanionPreset(preset.id));
+    grid.append(option);
+  });
+  const customButton = $("#choose-custom-companion");
+  const customSelected = !!state.companionImage;
+  customButton.classList.toggle("selected", customSelected);
+  customButton.setAttribute("aria-checked", String(customSelected));
+}
+
+function openCompanionPicker() {
+  renderCompanionPicker();
+  $("#companion-picker-dialog").showModal();
+}
+
+function selectCompanionPreset(presetId) {
+  const preset = COMPANION_PRESETS.find(item => item.id === presetId);
+  if (!preset) return;
+  state.companionPreset = preset.id;
+  state.companionImage = null;
+  saveState();
+  applyCompanion();
+  $("#companion-picker-dialog").close();
+  toast(`作業相棒を「${preset.name}」に変更しました`);
+}
+
 async function changeCompanion(file) {
   if (!file) return;
   try {
     toast("画像を最適化しています…");
     const imageBlob = await compressImage(file, 1200, .8);
     state.companionImage = await blobToDataUrl(imageBlob);
-    $("#companion-image").src = state.companionImage;
-    $("#timer-companion-image").src = state.companionImage;
+    state.companionPreset = "custom";
     saveState();
+    applyCompanion();
     toast("作業相棒の画像を変更しました");
   } catch (error) {
     toast(error.message || "画像を変更できませんでした");
@@ -1607,9 +1859,8 @@ function initializeUI() {
   renderCalendar();
   renderCollection();
   renderCurrentClock();
-  const companionSource = state.companionImage || "assets/companion-streamer-01.webp";
-  $("#companion-image").src = companionSource;
-  $("#timer-companion-image").src = companionSource;
+  applyCompanion();
+  $("#include-packs-standard").checked = state.settings.includePacksInStandard !== false;
   updateTimerUI();
 }
 
@@ -1625,7 +1876,14 @@ function bindEvents() {
   });
   $("#close-timer-control").addEventListener("click", () => $("#timer-control-dialog").close());
   $("#theme-toggle").addEventListener("click", toggleTheme);
-  $("#settings-theme-row").addEventListener("click", toggleTheme);
+  $("#settings-theme-row").addEventListener("click", () => $("#appearance-dialog").showModal());
+  $("#close-appearance").addEventListener("click", () => $("#appearance-dialog").close());
+  $$(".appearance-theme-option").forEach(option => {
+    option.addEventListener("click", () => setAppearanceTheme(option.dataset.appearanceTheme));
+  });
+  $$(".color-theme-option").forEach(option => {
+    option.addEventListener("click", () => setColorTheme(option.dataset.colorTheme));
+  });
   $("#close-timer-signal").addEventListener("click", () => $("#timer-signal-dialog").close());
   $$(".timer-kind-tab").forEach(tab => tab.addEventListener("click", () => setTimerKind(tab.dataset.timerKind)));
   $$(".mode-tab").forEach(tab => tab.addEventListener("click", () => setMode(tab.dataset.mode)));
@@ -1640,6 +1898,12 @@ function bindEvents() {
   $("#task-form").addEventListener("submit", addTask);
   $("#prev-month").addEventListener("click", () => { calendarCursor.setMonth(calendarCursor.getMonth() - 1); renderCalendar(); });
   $("#next-month").addEventListener("click", () => { calendarCursor.setMonth(calendarCursor.getMonth() + 1); renderCalendar(); });
+  $("#gacha-source-selector").addEventListener("click", async () => {
+    await mediaReady;
+    renderGachaSource();
+    $("#gacha-source-dialog").showModal();
+  });
+  $("#close-gacha-source").addEventListener("click", () => $("#gacha-source-dialog").close());
   $("#pull-gacha").addEventListener("click", pullGacha);
   $("#turn-gacha").addEventListener("click", turnGacha);
   $("#close-gacha-animation").addEventListener("click", () => {
@@ -1657,9 +1921,18 @@ function bindEvents() {
   $("#pull-again").addEventListener("click", pullAgain);
   $("#close-character-detail-x").addEventListener("click", closeCharacterDetail);
   $("#close-character-detail").addEventListener("click", closeCharacterDetail);
-  $("#change-companion").addEventListener("click", () => $("#companion-input").click());
-  $("#settings-image-row").addEventListener("click", () => $("#companion-input").click());
-  $("#settings-rates-row").addEventListener("click", () => $("#gacha-rates-dialog").showModal());
+  $("#settings-image-row").addEventListener("click", openCompanionPicker);
+  $("#close-companion-picker").addEventListener("click", () => $("#companion-picker-dialog").close());
+  $("#choose-custom-companion").addEventListener("click", () => {
+    $("#companion-picker-dialog").close();
+    $("#companion-input").value = "";
+    $("#companion-input").click();
+  });
+  $("#settings-rates-row").addEventListener("click", async () => {
+    await mediaReady;
+    renderGachaRates();
+    $("#gacha-rates-dialog").showModal();
+  });
   $("#close-gacha-rates").addEventListener("click", () => $("#gacha-rates-dialog").close());
   $("#settings-backup-row").addEventListener("click", openBackupDialog);
   $("#close-backup-dialog").addEventListener("click", () => $("#backup-dialog").close());
@@ -1668,9 +1941,16 @@ function bindEvents() {
   $("#backup-file-input").addEventListener("change", event => importBackup(event.target.files[0]));
   $("#settings-pack-row").addEventListener("click", async () => {
     await mediaReady;
+    $("#include-packs-standard").checked = state.settings.includePacksInStandard !== false;
     setPackStatus();
     renderInstalledPacks();
     $("#pack-manager-dialog").showModal();
+  });
+  $("#include-packs-standard").addEventListener("change", event => {
+    state.settings.includePacksInStandard = event.target.checked;
+    saveState();
+    renderGachaSource();
+    toast(event.target.checked ? "標準ガチャに有効なパックを追加します" : "標準ガチャを登録キャラのみにしました");
   });
   $("#close-pack-manager").addEventListener("click", () => $("#pack-manager-dialog").close());
   $("#pack-file-input").addEventListener("change", event => handlePackFile(event.target.files[0]));

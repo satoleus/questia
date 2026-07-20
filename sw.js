@@ -1,5 +1,5 @@
-const CACHE = "questia-v35";
-const ASSETS = ["./", "./index.html", "./styles.css?v=35", "./character-packs.js?v=35", "./app.js?v=35", "./manifest.webmanifest", "./assets/icon.svg", "./assets/companion-streamer-01.webp", "./assets/gacha-machine.webp"];
+const CACHE = "questia-v43";
+const ASSETS = ["./", "./index.html", "./styles.css?v=43", "./character-packs.js?v=43", "./app.js?v=43", "./manifest.webmanifest", "./assets/icon.svg", "./assets/companion-streamer-01.webp", "./assets/companion-02.webp", "./assets/companion-03.webp", "./assets/companion-04.webp", "./assets/companion-05.webp", "./assets/companion-07.webp", "./assets/companion-08.webp", "./assets/gacha-machine.webp"];
 self.addEventListener("install", event => event.waitUntil(
   caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
 ));

@@ -7,7 +7,7 @@
   <meta name="description" content="集中時間がオーブになる、作業相棒つきポモドーロアプリ" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=35" />
+  <link rel="stylesheet" href="styles.css?v=43" />
   <title>クエスティア | Questia</title>
 </head>
 <body>
@@ -45,7 +45,6 @@
               <span class="status-dot"></span>
               <span id="companion-message">今日も一緒に、少しずつ進めよう</span>
             </div>
-            <button id="change-companion" class="glass-button">画像を変更</button>
           </article>
         </div>
 
@@ -118,6 +117,11 @@
           </div>
           <div id="gacha-preview" class="gacha-preview">✦</div>
         </div>
+        <button id="gacha-source-selector" class="gacha-source-selector card" type="button" aria-haspopup="dialog">
+          <span class="gacha-source-icon">✦</span>
+          <span class="gacha-source-copy"><small>現在のガチャ</small><b id="gacha-source-name">標準ガチャ</b><em id="gacha-source-detail">登録キャラクター</em></span>
+          <strong>変更 ›</strong>
+        </button>
         <div class="gacha-actions">
           <button id="pull-gacha" class="gacha-button"><span>1回引く</span><small>◈ 5</small></button>
           <button id="open-register-character" class="secondary-button">キャラクターを登録</button>
@@ -130,8 +134,8 @@
         <div class="page-heading"><div><p class="eyebrow">PREFERENCES</p><h1>設定</h1></div></div>
         <div class="settings-list card">
           <button id="settings-timer-row" class="setting-row"><span><b>ポモドーロ時間</b><small>集中と休憩の長さ</small></span><strong id="settings-time-value">25分 / 5分</strong></button>
-          <button id="settings-theme-row" class="setting-row"><span><b>表示テーマ</b><small>ライト／ダーク</small></span><strong id="settings-theme-value">ダーク</strong></button>
-          <button id="settings-image-row" class="setting-row"><span><b>作業相棒の画像</b><small>画像は端末内に保存・自動圧縮</small></span><strong>変更 ›</strong></button>
+          <button id="settings-theme-row" class="setting-row"><span><b>テーマ／カラー</b><small>明るさとアプリ全体のカラー</small></span><strong class="setting-theme-value"><i id="settings-color-dot"></i><span id="settings-theme-value">ダーク・イエロー</span> ›</strong></button>
+          <button id="settings-image-row" class="setting-row"><span><b>作業相棒の画像</b><small>デフォルト候補／端末の画像</small></span><strong><span id="settings-image-value">星夜の配信者</span> ›</strong></button>
           <button id="settings-pack-row" class="setting-row"><span><b>召喚ライブラリ</b><small>キャラクターパック管理</small></span><strong id="settings-pack-count">0パック ›</strong></button>
           <button id="settings-rates-row" class="setting-row"><span><b>ガチャ排出率</b><small>レアリティごとの提供割合</small></span><strong>確認 ›</strong></button>
           <button id="settings-backup-row" class="setting-row"><span><b>バックアップと復元</b><small>画像・パックを含む全データ</small></span><strong>管理 ›</strong></button>
@@ -177,12 +181,57 @@
 
   <dialog id="gacha-rates-dialog">
     <div class="dialog-heading"><div><p class="eyebrow">DROP RATES</p><h2>ガチャ排出率</h2></div><button id="close-gacha-rates" type="button" class="icon-button" aria-label="排出率を閉じる">×</button></div>
+    <p id="gacha-rates-source" class="gacha-rates-source">標準ガチャ</p>
     <div class="gacha-rate-list">
-      <div class="ssr"><span><b>SSR</b><small>スペシャルレア</small></span><strong>5%</strong></div>
-      <div class="sr"><span><b>SR</b><small>スーパーレア</small></span><strong>28%</strong></div>
-      <div class="r"><span><b>R</b><small>レア</small></span><strong>67%</strong></div>
+      <div class="ssr"><span><b>SSR</b><small>スペシャルレア</small></span><strong id="gacha-rate-ssr">5%</strong></div>
+      <div class="sr"><span><b>SR</b><small>スーパーレア</small></span><strong id="gacha-rate-sr">28%</strong></div>
+      <div class="r"><span><b>R</b><small>レア</small></span><strong id="gacha-rate-r">67%</strong></div>
     </div>
-    <p class="gacha-rate-note">同じレアリティの中では、まだ出会っていないキャラクターが少し出やすくなります。</p>
+    <p id="gacha-rate-note" class="gacha-rate-note">同じレアリティの中では、まだ出会っていないキャラクターが少し出やすくなります。</p>
+  </dialog>
+
+  <dialog id="gacha-source-dialog" class="gacha-source-dialog">
+    <div class="dialog-heading">
+      <div><p class="eyebrow">SUMMON SELECT</p><h2>ガチャを選ぶ</h2></div>
+      <button id="close-gacha-source" type="button" class="icon-button" aria-label="ガチャ選択を閉じる">×</button>
+    </div>
+    <p class="gacha-source-intro">標準ガチャ、またはインストールしたキャラクターパックを選択できます。</p>
+    <div id="gacha-source-list" class="gacha-source-list" role="radiogroup" aria-label="ガチャ一覧"></div>
+  </dialog>
+
+  <dialog id="appearance-dialog" class="appearance-dialog">
+    <div class="dialog-heading">
+      <div><p class="eyebrow">APPEARANCE</p><h2>テーマ／カラー</h2></div>
+      <button id="close-appearance" type="button" class="icon-button" aria-label="テーマとカラーの選択を閉じる">×</button>
+    </div>
+    <p class="appearance-section-label">テーマ</p>
+    <div class="appearance-theme-options" role="radiogroup" aria-label="表示テーマ">
+      <button type="button" class="appearance-theme-option" data-appearance-theme="light"><span>☀</span><b>ライト</b><i>✓</i></button>
+      <button type="button" class="appearance-theme-option" data-appearance-theme="dark"><span>☾</span><b>ダーク</b><i>✓</i></button>
+    </div>
+    <p class="appearance-section-label color-label">カラー</p>
+    <div class="color-theme-grid" role="radiogroup" aria-label="カラーモード">
+      <button type="button" class="color-theme-option" data-color-theme="sky" style="--color-swatch:#74c9ff"><i></i><span><b>水色</b><small>SKY</small></span><strong>✓</strong></button>
+      <button type="button" class="color-theme-option" data-color-theme="pink" style="--color-swatch:#ff8fc5"><i></i><span><b>ピンク</b><small>ROSE</small></span><strong>✓</strong></button>
+      <button type="button" class="color-theme-option" data-color-theme="orange" style="--color-swatch:#ff9d62"><i></i><span><b>オレンジ</b><small>CORAL</small></span><strong>✓</strong></button>
+      <button type="button" class="color-theme-option" data-color-theme="yellow" style="--color-swatch:#ffcc70"><i></i><span><b>イエロー</b><small>SUN</small></span><strong>✓</strong></button>
+      <button type="button" class="color-theme-option" data-color-theme="mint" style="--color-swatch:#72d8ba"><i></i><span><b>ミント</b><small>MINT</small></span><strong>✓</strong></button>
+      <button type="button" class="color-theme-option" data-color-theme="purple" style="--color-swatch:#aa9cff"><i></i><span><b>パープル</b><small>VIOLET</small></span><strong>✓</strong></button>
+      <button type="button" class="color-theme-option" data-color-theme="brown" style="--color-swatch:#c99568"><i></i><span><b>ブラウン</b><small>EARTH</small></span><strong>✓</strong></button>
+      <button type="button" class="color-theme-option" data-color-theme="silver" style="--color-swatch:#b9c4d1"><i></i><span><b>シルバー</b><small>SILVER</small></span><strong>✓</strong></button>
+    </div>
+  </dialog>
+
+  <dialog id="companion-picker-dialog" class="companion-picker-dialog">
+    <div class="dialog-heading">
+      <div><p class="eyebrow">WORK PARTNER</p><h2>作業相棒を選ぶ</h2></div>
+      <button id="close-companion-picker" type="button" class="icon-button" aria-label="作業相棒の選択を閉じる">×</button>
+    </div>
+    <p class="companion-picker-intro">内蔵イラストから選ぶか、端末にある好きな画像を設定できます。</p>
+    <button id="choose-custom-companion" type="button" class="companion-custom-button">
+      <span>＋</span><span><b>端末から画像を選ぶ</b><small>PNG・JPEG・WebPなどを自動で最適化</small></span><strong id="custom-companion-check">✓</strong>
+    </button>
+    <div id="companion-preset-grid" class="companion-preset-grid" role="radiogroup" aria-label="デフォルトの作業相棒"></div>
   </dialog>
 
   <dialog id="character-dialog">
@@ -253,6 +302,11 @@
       <button id="close-pack-manager" type="button" class="icon-button" aria-label="パック管理を閉じる">×</button>
     </div>
     <p class="pack-manager-intro">追加パックを端末へインストールすると、オフラインでもガチャから仲間を召喚できます。</p>
+    <label class="pack-mix-setting">
+      <span><b>標準ガチャにパックキャラを含める</b><small>有効な全パックのキャラクターを標準ガチャへ追加</small></span>
+      <input id="include-packs-standard" type="checkbox" />
+      <i aria-hidden="true"></i>
+    </label>
     <label id="pack-drop-zone" class="pack-drop-zone">
       <span class="pack-drop-icon">⬡</span>
       <b>キャラクターパックを追加</b>
@@ -314,7 +368,7 @@
 
   <input id="companion-input" type="file" accept="image/*" hidden />
   <div id="toast" role="status" aria-live="polite"></div>
-  <script src="character-packs.js?v=35"></script>
-  <script src="app.js?v=35"></script>
+  <script src="character-packs.js?v=43"></script>
+  <script src="app.js?v=43"></script>
 </body>
 </html>
