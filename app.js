@@ -26,6 +26,12 @@ const COMPANION_PRESETS = Object.freeze([
   { id: "07", name: "子猫の相棒", caption: "KITTEN", src: "assets/companion-07.webp" },
   { id: "08", name: "子犬の相棒", caption: "PUPPY", src: "assets/companion-08.webp" }
 ]);
+const defaultCharacters = Object.freeze(
+  (globalThis.QUESTIA_DEFAULT_CHARACTERS || []).map(character => ({
+    ...character,
+    isDefault: true
+  }))
+);
 
 const initialState = {
   orbs: 100,
@@ -881,7 +887,7 @@ function renderCalendar() {
 }
 
 function allCharacters() {
-  const available = [...state.customCharacters, ...packCharacters];
+  const available = [...defaultCharacters, ...state.customCharacters, ...packCharacters];
   const availableIds = new Set(available.map(character => character.id));
   const missing = Object.values(state.collectionSnapshots)
     .filter(snapshot => state.owned.includes(snapshot.id) && !availableIds.has(snapshot.id))
@@ -900,6 +906,7 @@ function gachaCharactersForSource(source = state.settings.gachaSource) {
     return packCharacters.filter(character => character.packId === packId && character.packEnabled !== false);
   }
   return [
+    ...defaultCharacters,
     ...state.customCharacters,
     ...(state.settings.includePacksInStandard
       ? packCharacters.filter(character => character.packEnabled !== false)
@@ -940,8 +947,8 @@ function gachaSourceInfo(source = state.settings.gachaSource) {
     source: "standard",
     name: "標準ガチャ",
     detail: state.settings.includePacksInStandard
-      ? `${count}体・登録キャラ＋有効パック`
-      : `${count}体・登録キャラクターのみ`,
+      ? `${count}体・標準キャラ＋登録キャラ＋有効パック`
+      : `${count}体・標準キャラ＋登録キャラ`,
     icon: "✦"
   };
 }
@@ -1085,7 +1092,7 @@ function renderCollection() {
       ${missingLabel ? `<small>${missingLabel}</small>` : ""}`;
     if (owned) card.addEventListener("click", () => showCharacterDetail(char));
     wrapper.append(card);
-    if (!char.packId && !char.missingPack) {
+    if (!char.packId && !char.missingPack && !char.isDefault) {
       const deleteButton = document.createElement("button");
       deleteButton.type = "button";
       deleteButton.className = "delete-character";
@@ -1134,7 +1141,9 @@ async function showCharacterDetail(char) {
   $("#detail-name").textContent = char.name;
   const packInfo = char.missingPack
     ? "キャラクターパックがインストールされていません"
-    : char.packName ? `${char.packName}${char.author ? ` / ${char.author}` : ""}` : "手動登録";
+    : char.packName
+      ? `${char.packName}${char.author ? ` / ${char.author}` : ""}`
+      : char.isDefault ? "標準キャラクター" : "手動登録";
   const acquiredAt = state.collectionSnapshots[char.id]?.acquiredAt;
   const acquiredLabel = acquiredAt ? ` · 初回 ${new Date(acquiredAt).toLocaleDateString("ja-JP")}` : "";
   $("#detail-caption").textContent = `${packInfo} · 排出 ${Number(state.pullCounts[char.id] || 0)}回${acquiredLabel}`;
