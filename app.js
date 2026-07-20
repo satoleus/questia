@@ -1086,7 +1086,7 @@ function renderCollection() {
       <div class="art">
         ${art}
         <span class="rarity-badge">${char.rarity}</span>
-        ${owned && count > 1 ? `<span class="character-count">×${count}</span>` : ""}
+        ${owned && count > 0 ? `<span class="character-count">×${count}</span>` : ""}
       </div>
       <b>${owned ? escapeHtml(char.name) : "？？？"}</b>
       ${missingLabel ? `<small>${missingLabel}</small>` : ""}`;
@@ -1331,12 +1331,6 @@ function playGachaTone(kind) {
 
 async function showGachaResult(char) {
   await ensureCharacterImage(char).catch(() => null);
-  $("#result-rarity").textContent = char.rarity;
-  $("#result-name").textContent = char.name;
-  const count = Number(state.pullCounts[char.id] || 0);
-  $("#result-message").textContent = count === 1
-    ? "新しい作業仲間と出会いました"
-    : `${count}回目の出会いです`;
   $("#result-art").innerHTML = char.image
     ? `<img src="${char.image}" alt="${escapeHtml(char.name)}">`
     : `<span style="color:${char.color || "#8fc8ff"}">${char.symbol || "✦"}</span>`;

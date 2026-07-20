@@ -1,8 +1,8 @@
-importScripts("./default-characters.js?v=44");
-const CACHE = "questia-v44";
+importScripts("./default-characters.js?v=45");
+const CACHE = "questia-v45";
 const DEFAULT_CHARACTER_ASSETS = (globalThis.QUESTIA_DEFAULT_CHARACTERS || [])
   .flatMap(character => [character.image, character.thumbnail]);
-const ASSETS = ["./", "./index.html", "./styles.css?v=44", "./default-characters.js?v=44", "./character-packs.js?v=44", "./app.js?v=44", "./manifest.webmanifest", "./assets/icon.svg", "./assets/companion-streamer-01.webp", "./assets/companion-02.webp", "./assets/companion-03.webp", "./assets/companion-04.webp", "./assets/companion-05.webp", "./assets/companion-07.webp", "./assets/companion-08.webp", "./assets/gacha-machine.webp", ...DEFAULT_CHARACTER_ASSETS];
+const ASSETS = ["./", "./index.html", "./styles.css?v=45", "./default-characters.js?v=45", "./character-packs.js?v=45", "./app.js?v=45", "./manifest.webmanifest", "./assets/icon.svg", "./assets/companion-streamer-01.webp", "./assets/companion-02.webp", "./assets/companion-03.webp", "./assets/companion-04.webp", "./assets/companion-05.webp", "./assets/companion-07.webp", "./assets/companion-08.webp", "./assets/gacha-machine.webp", ...DEFAULT_CHARACTER_ASSETS];
 self.addEventListener("install", event => event.waitUntil(
   caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
 ));

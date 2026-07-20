@@ -540,14 +540,30 @@ dialog label { display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
   100% { opacity: 0; transform: translateY(-125px) scale(6) rotate(540deg); filter: brightness(3); }
 }
 
-.result-dialog { text-align: center; overflow: hidden; }
+.result-dialog {
+  width: min(760px, calc(100% - 16px));
+  max-height: calc(100dvh - 16px);
+  padding: 16px;
+  text-align: center;
+  overflow: hidden;
+}
 .result-dialog > * { position: relative; z-index: 1; }
-#result-glow { position: absolute; z-index: 0; width: 260px; height: 260px; top: 40px; left: 50%; transform: translateX(-50%); border-radius: 50%; background: var(--accent); opacity: .2; filter: blur(45px); }
-#result-rarity { color: var(--accent); font-weight: 900; letter-spacing: .2em; }
-.result-art { width: 220px; height: 250px; margin: 10px auto 22px; display: grid; place-items: center; overflow: hidden; border-radius: 22px; background: linear-gradient(145deg,#253653,#5c4266); font-size: 90px; }
-.result-art img { width: 100%; height: 100%; object-fit: cover; }
+#result-glow { position: absolute; z-index: 0; width: 70%; aspect-ratio: 1; top: 5%; left: 50%; transform: translateX(-50%); border-radius: 50%; background: var(--accent); opacity: .16; filter: blur(60px); }
+.result-art {
+  width: min(680px, 100%, calc(100dvh - 130px));
+  aspect-ratio: 1;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 18px;
+  background: rgba(5,10,22,.35);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.1);
+  font-size: 90px;
+}
+.result-art img { width: 100%; height: 100%; display: block; object-fit: contain; }
 .result-dialog .primary-button { width: 100%; }
-.result-actions { display: grid; grid-template-columns: 1fr 1.25fr; gap: 10px; }
+.result-actions { width: min(680px, 100%); margin: auto; display: grid; grid-template-columns: 1fr 1.25fr; gap: 10px; }
 .result-actions .secondary-button { width: 100%; }
 .result-actions small { display: block; font-size: 9px; }
 .result-actions button:disabled { opacity: .4; cursor: not-allowed; filter: grayscale(.5); }
@@ -661,6 +677,10 @@ dialog label { display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
   .gacha-preview { font-size: 110px; }
   .gacha-source-selector { margin-top: 14px; }
   .gacha-actions { flex-direction: column; }
+  .result-dialog { padding: 10px; border-radius: 18px; }
+  .result-art { margin-bottom: 10px; border-radius: 13px; }
+  .result-actions { gap: 7px; }
+  .result-actions button { min-height: 48px; padding-inline: 8px; font-size: 12px; }
   .day { min-height: 67px; padding: 7px; font-size: 13px; }
   .day .focus-mark { left: 6px; bottom: 5px; font-size: 9px; }
   .pack-manager-dialog, .pack-preview-dialog { padding: 19px; }
